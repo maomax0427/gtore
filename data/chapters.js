@@ -1,6 +1,6 @@
 // Udemy「G検定 集中講義」（辻 大貴）の章立てに合わせた目次。
 // lec の名前は講座のレクチャー名と同じ。問題・カード・図解はこの名前でひもづける。
-window.G = { chapters: [], qs: [], cards: [], lessons: [], _ch: 0, _qn: 0, _cn: 0 };
+window.G = { chapters: [], qs: [], cards: [], lessons: [], keys: {}, more: {}, _ch: 0, _qn: 0, _cn: 0 };
 
 G.chapters = [
   { n: 1, sec: 2, emo: '🤖', title: '人工知能とは', lecs: ['人工知能の定義', '人工知能の大まかな分類', 'ロボットとAI効果', '人工知能研究の歴史', '人工知能分野の問題①', '人工知能分野の問題②', '人工知能分野の問題③', '人工知能分野の問題④', '人工知能に関する代表的な国際会議'] },
@@ -26,6 +26,10 @@ G.begin = ch => { G._ch = ch; G._qn = 0; G._cn = 0; };
 G.Q = (lec, q, o, e) => { G.qs.push({ id: G._ch + '-' + (++G._qn), ch: G._ch, lec, q, o, e }); };
 G.C = (f, b, lec) => { G.cards.push({ id: G._ch + 'c' + (++G._cn), ch: G._ch, f, b, lec }); };
 G.L = (lec, title, html) => { G.lessons.push({ id: G._ch + ':' + lec, ch: G._ch, lec, title, html }); };
+// 追加ファイル（moreNN.js）用：章を切り替えるだけで、問題・カードの通し番号は続きから
+G.at = ch => { G._ch = ch; G._qn = G.qs.filter(q => q.ch === ch).length; G._cn = G.cards.filter(c => c.ch === ch).length; };
+G.K = (lec, pts) => { G.keys[G._ch + ':' + lec] = pts; };   // ここを覚える（要点）
+G.X = (lec, title, html) => { (G.more[G._ch + ':' + lec] = G.more[G._ch + ':' + lec] || []).push({ title, html }); };   // もっと詳しく
 
 // 図解でよく使う部品
 G.svg = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>${body}</svg>`;

@@ -130,6 +130,7 @@ function pHome() {
     <button class="card tile tap" data-a="weak"><span class="ic">🎯</span><span class="t">苦手つぶし</span><span class="s">正答率の低い章から10問</span></button>
     <button class="card tile tap" data-a="cardsAll"><span class="ic">📇</span><span class="t">用語カード</span><span class="s">まだ覚えていない用語を20枚</span></button>
   </div>
+  <button class="card li tap mt12" data-a="notes" data-ch="0" style="border-radius:var(--r)"><span class="emo">📝</span><span class="grow"><div class="ttl">まとめノート</div><div class="small muted">全レクチャーの要点を一気に見直す（試験前に）</div></span><span class="chev">${IC.chev}</span></button>
   <div class="sec-h">ぜんたいの進み具合</div>
   <div class="card kpis"><div><b class="num">${all.done}<small class="muted" style="font-size:13px">/${all.total}</small></b><span>挑戦した問題</span></div><div><b class="num">${all.n ? all.acc + '%' : '—'}</b><span>正答率</span></div><div><b class="num">${all.master}</b><span>習得した問題</span></div></div>
   <p class="small muted" style="margin:14px 4px">使い方：Udemyで1レクチャー見る → 講座タブで同じレクチャーを開いて図解を読む → 問題を解く。間違えた問題は1日後・3日後・7日後に復習タブに出てきます。</p>`;
@@ -139,9 +140,11 @@ function pHome() {
 function pCourse() {
   const top = V.stack[V.stack.length - 1];
   if (top && top.p === 'lec') return pLecture(top.ch, top.lec);
+  if (top && top.p === 'notes') return pNotes(top.ch);
   if (top && top.p === 'ch') return pChapter(top.ch);
   return `<div class="page-h"><h1>講座</h1></div>
   <p class="small muted" style="margin:-6px 4px 12px">Udemy「G検定 集中講義」と同じ順番です。</p>
+  <button class="card li tap mb12" data-a="notes" data-ch="0" style="border-radius:var(--r)"><span class="emo">📝</span><span class="grow"><div class="ttl">全章のまとめノート</div><div class="small muted">全レクチャーの「ここを覚える」を一気に見直す</div></span><span class="chev">${IC.chev}</span></button>
   <div class="card list">${G.chapters.map(c => {
     const s = summary(qsOf(c.n)), nl = G.lessons.filter(l => l.ch === c.n).length;
     return `<button class="li tap" data-a="ch" data-ch="${c.n}"><span class="emo">${c.emo}</span><span class="grow">
@@ -167,6 +170,7 @@ function pChapter(n) {
   <div class="tiny muted">${chLabel(n)} ・ Udemyセクション${c.sec}</div>
   <div class="page-h" style="margin-top:2px"><h1 style="font-size:24px">${c.emo} ${esc(c.title)}</h1></div>
   <div class="row2"><button class="btn primary" data-a="chQuiz" data-ch="${n}">章の問題 ${qs.length}問</button><button class="btn soft" data-a="chCards" data-ch="${n}">用語カード ${cs.length}</button></div>
+  <button class="btn gray block mt8" data-a="notes" data-ch="${n}">📝 この章のまとめノート</button>
   ${wr ? `<button class="btn danger block mt8" data-a="chWrong" data-ch="${n}">この章の間違えた問題 ${wr}問</button>` : ''}
   <div class="small muted mt8" style="margin-left:4px">挑戦 ${s.done}/${s.total}問${s.n ? ` ・ 正答率 ${s.acc}%` : ''}</div>
   <div class="sec-h">レクチャー</div>
@@ -174,6 +178,27 @@ function pChapter(n) {
     const l = lessonOf(n, lec), seen = l && S.seen[l.id];
     return `<button class="li tap" data-a="lec" data-ch="${n}" data-lec="${esc(lec)}"><span class="tiny muted num" style="width:18px;text-align:right">${i + 1}</span><span class="grow"><div class="ttl">${esc(lec)}</div><div class="badges">${l ? `<span class="pill ${seen ? 'ok' : 'ac'}">📘 ${seen ? '図解 読んだ' : '図解'}</span>` : ''}${lecStatus(n, lec)}</div></span><span class="chev">${IC.chev}</span></button>`;
   }).join('')}</div>`;
+}
+
+// レクチャーの中身：タイトル → ここを覚える → 図解 → もっと詳しく
+function lessonBody(n, lec) {
+  const l = lessonOf(n, lec), k = G.keys[n + ':' + lec], more = G.more[n + ':' + lec] || [];
+  return `<h2>${esc(l ? l.title : lec)}</h2>
+    ${k ? `<div class="keys"><div class="keys-h">ここを覚える</div><ol>${k.map(p => `<li>${p}</li>`).join('')}</ol></div>` : ''}
+    ${l ? l.html : more.length ? '' : `<p class="muted">このレクチャーは問題と用語カードで確認しましょう。</p>`}
+    ${more.map(m => `<div class="more"><div class="more-h">もっと詳しく</div><h3>${esc(m.title)}</h3>${m.html}</div>`).join('')}`;
+}
+
+function pNotes(n) {
+  const chs = n ? [chap(n)] : G.chapters;
+  const total = chs.reduce((s, c) => s + c.lecs.filter(lec => G.keys[c.n + ':' + lec]).length, 0);
+  return `<button class="back" data-a="pop">${IC.back}${n ? esc(chap(n).title) : '講座'}</button>
+  <div class="page-h" style="margin-top:2px"><h1 style="font-size:26px">📝 まとめノート</h1></div>
+  <p class="small muted" style="margin:-6px 4px 12px">${n ? `${chLabel(n)}の` : '全章の'}要点だけを集めたページです（${total}レクチャー分）。試験前の見直しに。タイトルをタップするとそのレクチャーが開きます。</p>
+  ${chs.map(c => `${n ? '' : `<div class="sec-h">${c.emo} ${chLabel(c.n)} ${esc(c.title)}</div>`}
+    <div class="card list notes">${c.lecs.filter(lec => G.keys[c.n + ':' + lec]).map(lec => `<div class="li"><div class="grow">
+      <button class="link tap" data-a="lec" data-ch="${c.n}" data-lec="${esc(lec)}">${esc(lec)}</button>
+      <ul>${G.keys[c.n + ':' + lec].map(p => `<li>${p}</li>`).join('')}</ul></div></div>`).join('')}</div>`).join('')}`;
 }
 
 function pLecture(n, lec) {
@@ -184,8 +209,7 @@ function pLecture(n, lec) {
   return `<button class="back" data-a="pop">${IC.back}${esc(c.title)}</button>
   <div class="card lesson">
     <div class="tiny muted">${chLabel(n)} ・ レクチャー${i + 1}</div>
-    <h2>${esc(l ? l.title : lec)}</h2>
-    ${l ? l.html : `<p class="muted">このレクチャーは図解なし。問題と用語カードで確認しましょう。</p>`}
+    ${lessonBody(n, lec)}
   </div>
   ${qs.length ? `<button class="btn primary block mt12" data-a="lecQuiz" data-ch="${n}" data-lec="${esc(lec)}">このレクチャーの問題を解く（${qs.length}問）</button>` : ''}
   ${cs.length ? `<div class="sec-h">このレクチャーの用語</div><div class="card list termlist">${cs.map(t => `<div class="li"><div class="grow"><div class="f">${esc(t.f)}</div><div class="b">${esc(t.b)}</div></div></div>`).join('')}</div>` : ''}
@@ -327,7 +351,7 @@ function ovQuiz() {
       <button class="btn soft block mt12" data-a="pal">${Z.showPal ? '問題一覧を閉じる' : `問題一覧（回答済み ${na}/${N}）`}</button>
       ${Z.showPal ? `<div class="palette">${Z.items.map((x, k) => `<button class="${x.a !== null ? 'a' : ''}${k === Z.i ? ' cur' : ''}${Z.flags[k] ? ' f' : ''}" data-a="jump" data-k="${k}">${k + 1}</button>`).join('')}</div><button class="btn green block mt12" data-a="submit">採点する</button>` : ''}`;
   } else if (answered) {
-    const ok = it.perm[it.a] === 0, l = lessonOf(q.ch, q.lec);
+    const ok = it.perm[it.a] === 0, l = lessonOf(q.ch, q.lec) || G.keys[q.ch + ':' + q.lec];
     below = `<div class="fb"><div class="h ${ok ? 'ok' : 'ng'}">${ok ? '⭕ 正解！' : '❌ 不正解'}</div>
       ${ok ? '' : `<div class="small mt8"><b>正解：</b>${esc(q.o[0])}</div>`}
       <div class="exp">${esc(q.e)}</div>
@@ -407,7 +431,8 @@ const ACT = {
     V.tab = 'course';
     const ch = +d.ch;
     if (d.replace) V.stack.pop();
-    if (!V.stack.length || V.stack[V.stack.length - 1].ch !== ch) V.stack = [{ p: 'ch', ch }];
+    const top = V.stack[V.stack.length - 1];
+    if (!top || (top.p !== 'notes' && top.ch !== ch)) V.stack = [{ p: 'ch', ch }];
     V.stack.push({ p: 'lec', ch, lec: d.lec });
     render(); scrollTo(0, 0);
   },
@@ -460,7 +485,8 @@ const ACT = {
     if (Z && Z.kind === 'quiz' && Z.mode === 'mock' && !Z.done && !confirm('模試をやめますか？（記録されません）')) return;
     closeOv();
   },
-  peek: d => { const l = lessonOf(+d.ch, d.lec); if (l) openSheet(`<div class="card lesson"><h2>${esc(l.title)}</h2>${l.html}</div>`); },
+  peek: d => openSheet(`<div class="card lesson">${lessonBody(+d.ch, d.lec)}</div>`),
+  notes: d => { V.tab = 'course'; V.stack.push({ p: 'notes', ch: +d.ch || 0 }); render(); scrollTo(0, 0); },
   closeSheet,
   flip: () => { Z.flip = !Z.flip; document.querySelector('.flash').classList.toggle('flip', Z.flip); },
   cardYes: () => cardMark(true),

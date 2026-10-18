@@ -187,6 +187,22 @@ body.lock { overflow: hidden; }
 .ill .arr { marker-end: url(#ah); }
 
 .termlist .li { align-items: flex-start; }
+.mb12 { margin-bottom: 12px; }
+.keys { background: var(--accent-soft); border-radius: 12px; padding: 10px 12px 6px; margin: 12px 0 14px; }
+.keys-h { font-size: 12px; font-weight: 800; color: var(--accent); }
+.keys ol { margin: 4px 0; padding-left: 1.3em; }
+.keys li { margin: 4px 0; font-size: 14.5px; font-weight: 600; }
+.more { border-top: 1px dashed var(--line); margin-top: 22px; padding-top: 14px; }
+.more-h { display: inline-block; font-size: 11px; font-weight: 800; color: var(--teal); background: var(--teal-soft); border-radius: 99px; padding: 2px 9px; }
+.more h3 { margin-top: 6px; }
+.lesson .ex { background: var(--field); border-radius: 12px; padding: 10px 12px; margin: 10px 0; font-size: 14px; }
+.lesson .ex::before { content: "例題"; display: block; font-size: 11.5px; font-weight: 800; color: var(--sub); margin-bottom: 2px; }
+.lesson .trap { background: var(--red-soft); border-radius: 12px; padding: 10px 12px; margin: 12px 0; font-size: 14px; }
+.lesson .trap::before { content: "ひっかけ注意"; display: block; font-size: 11.5px; font-weight: 800; color: var(--red); margin-bottom: 2px; }
+.notes .li { align-items: flex-start; }
+.notes .link { font-size: 15px; text-align: left; }
+.notes ul { margin: 6px 0 0; padding-left: 1.2em; font-size: 14px; }
+.notes li { margin: 3px 0; }
 .termlist .f { font-weight: 700; }
 .termlist .b { font-size: 13.5px; color: var(--sub); margin-top: 2px; }
 

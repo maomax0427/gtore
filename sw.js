@@ -1,6 +1,7 @@
 // アプリ本体をキャッシュして、電車の中など電波が弱くても勉強できるようにする。
-const CACHE = 'gtore-v1';
-const DATA = ['chapters', ...Array.from({ length: 11 }, (_, i) => 'ch' + String(i + 1).padStart(2, '0'))].map(n => `data/${n}.js`);
+const CACHE = 'gtore-v2';
+const NN = Array.from({ length: 11 }, (_, i) => String(i + 1).padStart(2, '0'));
+const DATA = ['chapters', ...NN.map(n => 'ch' + n), ...NN.map(n => 'more' + n)].map(n => `data/${n}.js`);
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', ...DATA, 'manifest.webmanifest', 'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
